@@ -83,8 +83,8 @@ server.get('/console', (req, res) => {
 
 // 
 // Start web server and tunnel
-server.listen(3000, () => {
-  console.log("[WEB] Server listening on 3000");
+server.listen(8080, () => {
+  console.log("[WEB] Server listening on 8080");
 
   if (!options.subdomain) return;
   const web = spawn('./pgrok', ['-log=stdout', '-config=tunnel', `-subdomain=${options.subdomain}`, '3000']);

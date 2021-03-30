@@ -1,0 +1,11 @@
+{
+  "apps": [
+    {
+      "app_id": "app_e7c97668-a635-4840-8703-b8e120c3cf0a",
+      "org_id": "user_ea51587e-0807-46ee-a959-6c75e2333b44",
+      "deploy_url": "https://push-par-clevercloud-customers.services.clever-cloud.com/app_e7c97668-a635-4840-8703-b8e120c3cf0a.git",
+      "name": "lococovu/node",
+      "alias": "lococovunode"
+    }
+  ]
+}
