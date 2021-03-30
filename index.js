@@ -1,95 +1,42 @@
-// 
 // Packages
-const server    = require('express')();
-const { spawn } = require('child_process');
+const app            = require('express')();
+const populateConfig = require('./api/config/populate');
+const webTunnel      = require('./api/actions/tunnels/webTunnel');
 
-const git       = require('simple-git');
-const SServer   = require('scriptserver');
+const walk           = require('./api/helpers/walk.js');
+const path           = require('path');
 
-const low = require('lowdb')
-const FileSync = require('lowdb/adapters/FileSync');
+// Routes
+walk('./api/routes', (error, files) => {
+  files.forEach((element) => {
+    let route = require(element);
+    let filePath = path.relative(__dirname + '/api/routes', element);
+    let url = filePath.split('.').shift();
 
-const adapter = new FileSync('db.json')
-const db = low(adapter)
-
-db.defaults({
-  console: []
-}).write();
-
-const game      = new SServer({
-  core: {
-    jar: './server.jar',
-    args: ['-Xmx2G'],
-  }
-});
-
-game.on('console', (line) => {
-  db.get('console').push(line).write();
-});
-
-// 
-// Options object
-let options = {
-  subdomain: process.env.subdomain,
-  tunnel: {
-    port: null,
-    url: null
-  }
-};
-
-// 
-// REST-API
-server.get('/', (req, res) => {
-  res.end(JSON.stringify({ hello: "there" }));
-});
-
-server.get('/options', (req, res) => {
-  res.end(JSON.stringify(options));
-});
-
-server.get('/start', (req, res) => {
-  game.start();
-
-  // And now let's open new pgrok connection
-  const tunnel = spawn('./pgrok', ['-log=stdout', '-config=tunnel', `-proto=tcp`, '25565']);
-
-  tunnel.stdout.on('data', (d) => {
-    // Getting tunnel port
-    let data = `${d}`;
-    if (options.tunnel.port == null || options.tunnel.url == null) {
-      let lines = data.split("\n");
-
-      lines.forEach((line) => {
-        if (line.includes("Tunnel established at")) {
-          let prep = line.split("tcp://");
-          options.tunnel.url  = `play.${prep[1]}`;
-          options.tunnel.port = prep[1].split(':')[1];
-
-          console.log('OPTIONS:');
-          console.log(options);
+    if (!url.includes("_")) {
+      try {
+        if (url.includes("index")) {
+          url = path.dirname(filePath);
         };
-      });
-    };
 
-    // console.log(`[TUNNEL/${options.tunnel.port}] ${data}`);
-  });
+        app.use(`/${url == "." ? "" : url}`, route)
+      }
 
-  res.end(JSON.stringify({ task: "startServer", status: "RUNNING" }));
+      // Lock at this! It's a very complicated logging system!1!!
+      catch(error) {
+        console.log(error);
+      }
+    }
+  })
 });
-
-server.get('/console', (req, res) => {
-  res.end(JSON.stringify(db.get('console')));
-});
-
-// 
+ 
 // Start web server and tunnel
-server.listen(8080, () => {
+app.listen(8080, () => {
   console.log("[WEB] Server listening on 8080");
 
-  if (!options.subdomain) return;
-  const web = spawn('./pgrok', ['-log=stdout', '-config=tunnel', `-subdomain=${options.subdomain}`, '8080']);
+  // Populating configs
+  populateConfig();
 
-  web.stdout.on('data', (data) => {
-    console.log(`[WEB/${options.subdomain}] ${data}`);
-  });
+  // Starting web tunnel
+  webTunnel();
 });
