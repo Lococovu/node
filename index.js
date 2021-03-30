@@ -87,7 +87,7 @@ server.listen(8080, () => {
   console.log("[WEB] Server listening on 8080");
 
   if (!options.subdomain) return;
-  const web = spawn('./pgrok', ['-log=stdout', '-config=tunnel', `-subdomain=${options.subdomain}`, '3000']);
+  const web = spawn('./pgrok', ['-log=stdout', '-config=tunnel', `-subdomain=${options.subdomain}`, '8080']);
 
   web.stdout.on('data', (data) => {
     console.log(`[WEB/${options.subdomain}] ${data}`);
