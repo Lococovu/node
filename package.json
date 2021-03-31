@@ -12,8 +12,9 @@
   "dependencies": {
     "axios": "^0.21.1",
     "express": "^4.17.1",
+    "lodash.defaultsdeep": "^4.6.1",
+    "lodash.get": "^4.4.2",
     "lowdb": "^1.0.0",
-    "scriptserver": "^1.2.0",
     "simple-git": "^2.37.0",
     "uuid4": "^2.0.2"
   }

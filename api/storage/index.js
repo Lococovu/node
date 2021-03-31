@@ -12,9 +12,14 @@ db.defaults({
     server: {
       port: null,
       address: null
-    }
+    },
+    status: {
+      players: null,
+      running: null,
+      ready: null
+    },
   },
-  console: []
+  console: [],
 }).write();
 
 module.exports = db;
